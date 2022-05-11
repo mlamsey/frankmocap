@@ -112,6 +112,7 @@ class Visualizer(object):
         if pred_mesh_list is not None:
             rend_img = self.__render_pred_verts(input_img, pred_mesh_list)
             if rend_img is not None:
+                rend_img = cv2.resize(rend_img, [res_img.shape[1], res_img.shape[0]])
                 res_img = np.concatenate((res_img, rend_img), axis=1)
             # res_img = rend_img
         

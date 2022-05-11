@@ -1,3 +1,6 @@
+# Lamsey 2022
+# Runs frankmocap on a d435i realsense in real time
+
 # imports
 import pyrealsense2 as rs
 import numpy as np
@@ -16,7 +19,7 @@ resolution_depth = [640, 480]
 resolution_color = [640, 480]
 fps_color = 30
 
-# setup
+# setup realsense camera
 pipeline = rs.pipeline()
 config = rs.config()
 config.enable_stream(rs.stream.depth, resolution_depth[0], resolution_depth[1], rs.format.z16, fps_color) # note that the fps downsampling will be applied later
@@ -50,8 +53,8 @@ def predict_pose(img):
 
 def render_prediction(body_bbox, img):
     if body_bbox is None:
-        # return visualizer.visualize(img)
-        return np.concatenate((img, img), axis=1)
+        return np.concatenate((img, img), axis=1), None
+
     # match fmc names
     body_bbox_list = body_bbox
     img_original_bgr = img
@@ -59,7 +62,7 @@ def render_prediction(body_bbox, img):
     # config [dirty]
     single_person = True
 
-    #Sort the bbox using bbox size 
+    # Sort the bbox using bbox size 
     # (to make the order as consistent as possible without tracking)
     bbox_size =  [ (x[2] * x[3]) for x in body_bbox_list]
     idx_big2small = np.argsort(bbox_size)[::-1]
@@ -80,11 +83,14 @@ def render_prediction(body_bbox, img):
         pred_mesh_list = pred_mesh_list, 
         body_bbox_list = body_bbox_list)
     
-    return res_img
+    return res_img, pred_output_list
 
 # main
 if __name__ == '__main__':
+    # start realsense camera
     pipeline.start(config)
+
+    # run until ctrl+c
     while True:
         try:
             frames = pipeline.wait_for_frames()
@@ -99,25 +105,16 @@ if __name__ == '__main__':
 
             depth_image = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=-0.04, beta=255.0), cv2.COLORMAP_HSV)
 
+            # flip + rotate stuff
             color_image = np.moveaxis(color_image, 0, 1)
             color_image = np.fliplr(color_image)
             depth_image = np.moveaxis(depth_image, 0, 1)
             depth_image = np.fliplr(depth_image)
 
+            # predict + render
             body_pose, body_bbox = predict_pose(color_image)
             if body_pose is not None:
-                res_img = render_prediction(body_bbox, color_image)
-
-                cv2.namedWindow('frankmocap', cv2.WINDOW_AUTOSIZE)
-                cv2.imshow('frankmocap', res_img)
-
-            # colorAndDepth_image = np.hstack((color_image, depth_image))
-
-            # cv2.namedWindow('Realsense', cv2.WINDOW_AUTOSIZE)
-            # cv2.imshow('Realsense', colorAndDepth_image)
-
-            if cv2.waitKey(1) & 0xFF != 255:
-                raise KeyboardInterrupt()
+                res_img, _ = render_prediction(body_bbox, color_image)
 
         except KeyboardInterrupt:
             break

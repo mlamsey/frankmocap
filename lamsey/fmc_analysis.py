@@ -1,3 +1,6 @@
+# Lamsey 2022
+# Script for analyzing smpl outputs (living doc)
+
 import numpy as np
 import matplotlib.pyplot as plt
 import smpl_dict
