@@ -31,15 +31,3 @@ for i in range(8):
     print("Frame " + str(i))
     print("Human Height: {height:.2f}m".format(height=height))
     print("Actual: 1.67m to 1.72m")
-
-# print(vertices.shape)
-# print([max(vertices[:, i]) for i in range(3)])
-# print([min(vertices[:, i]) for i in range(3)])
-
-# # generate trimesh
-# face_colors = np.ones([body_model.faces.shape[0], 4]) * [0.7, 0.7, 0.7, 0.8]
-# m = trimesh.Trimesh(vertices=vertices, faces=faces, face_colors=face_colors)
-#
-# # create scene
-# scene = m.scene()
-# scene.show()
