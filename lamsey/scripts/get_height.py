@@ -23,11 +23,20 @@ for i in range(8):
     # for entry, id in SMPLDict().joint_dict.items():
         # print(entry + ": " + str(joints[id]))
 
+    # calculate body shape
     sd = SMPLDict()
     head_id = sd.joint_dict["head"]
     left_foot_id = sd.joint_dict["left_foot"]
-
     height = max(vertices[:, 1]) - min(vertices[:, 1])
+
+    left_shoulder_pos = joints[sd.joint_dict["left_shoulder"]]
+    left_palm_pos = joints[sd.joint_dict["left_palm"]]
+    # print(left_shoulder_pos)
+    # print(left_palm_pos)
+    arm_length = np.linalg.norm(np.array(left_shoulder_pos) - np.array(left_palm_pos))
+    print("Arm Length: {l:.2f}m".format(l=arm_length))
+
+    # print
     print("Frame " + str(i))
     print("Human Height: {height:.2f}m".format(height=height))
     print("Actual: 1.67m to 1.72m")
